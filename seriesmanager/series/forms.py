@@ -10,3 +10,9 @@ class NewUserForm(UserCreationForm):
     class Meta:
         model = User
         fields = ('username', 'email', 'password1')
+
+
+class SearchForm(forms.Form):
+    series_name = forms.CharField()
+
+
