@@ -8,5 +8,8 @@ urlpatterns = [
     path("registration", Registration.as_view(), name="registration"),
     path("logout", sign_out, name="logout"),
     path("search", SearchPage.as_view(), name="search"),
-    path("result", ResultPage.as_view(), name="result")
+    path("result", ResultPage.as_view(), name="result"),
+    path("modify/<int:id>", modify, name='modify'),
+    path("profile", ProfileView.as_view(), name='profile'),
+    path("series_info/<int:id>", SeriesInfoView.as_view(), name='series_info')
 ]

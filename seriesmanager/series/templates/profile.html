@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Ваш список:</h2>
+<ul>
+    {%for s in series%}
+        <li><a href="{% url 'series_info' id=s.id %}">{{s.title}}</a></li>
+    {%endfor%}
+</ul>
+
+<a class="btn btn-primary" href="{% url 'search' %}">Найти ещё</a>
+
+{% endblock %}
