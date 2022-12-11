@@ -7,6 +7,7 @@ enter_menu = [{"title" : "Sign in", "url" : "login"},
 exit_menu = [{"title" : "Logout", "url" : "logout"},
              {"title" : "Home", "url" : "home"}]
 
+current_series = dict()
 
 class Mixin:
     def get_context_mixin(self, request=None, **kwargs):

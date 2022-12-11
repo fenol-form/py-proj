@@ -15,4 +15,12 @@ class NewUserForm(UserCreationForm):
 class SearchForm(forms.Form):
     series_name = forms.CharField()
 
+class ScoreForm(forms.Form):
+    series_score = forms.IntegerField(min_value=1,
+                                      max_value=10,
+                                      step_size=1,
+                                      widget=forms.NumberInput,
+                                      label="Ваша оценка",
+                                      required=False)
+
 

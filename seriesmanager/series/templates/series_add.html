@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% load crispy_forms_tags %}
+
+<p> {{series_result}}</p>
+<p> {{series_name}}</p>
+<p> {{series_rating}}</p>
+<p> {{series_years}}</p>
+<p> {{series_countries}}</p>
+<p> {{series_genres}}</p>
+<p> {{series_description}}</p>
+
+<form method="post">
+        {% csrf_token %}
+
+        {{ form|crispy }}
+
+        {% if change %}
+        <button class="btn btn-primary" type="submit" name="change">Применить изменения</button>
+        {% else %}
+        <button class="btn btn-primary" type="submit" name="add">Добавить в список</button>
+        {% endif %}
+</form>
+
+
+{% endblock %}
