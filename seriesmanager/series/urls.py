@@ -13,5 +13,5 @@ urlpatterns = [
     path("profile", ProfileView.as_view(), name="profile"),
     path("series_info/<int:id>", SeriesInfoView.as_view(), name="series_info"),
     path("series_add", SeriesAddView.as_view(), name="series_add"),
-    path("series_add/<action>", SeriesAddView.as_view(), name="series_add")
+    path("series_add/<action>", SeriesAddView.as_view(), name="series_add"),
 ]

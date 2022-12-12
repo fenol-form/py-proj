@@ -81,6 +81,9 @@ class SearchPage(LoginRequiredMixin, Mixin, FormView):
     def post(self, request, *args, **kwargs):
         data = parse(request.POST['series_name'])
         series_result = data.result
+        if series_result == "Сериал не найден":
+            context = self.get_context_mixin(request=self.request)
+            return render(request, "series_not_found.html", context)
         series_name = data.name
         series_rating = f"Рейтинг: {data.rating}"
         series_years = f"Годы съёмки: {data.years}"
@@ -89,32 +92,33 @@ class SearchPage(LoginRequiredMixin, Mixin, FormView):
         series_description = data.description
         saved = TVShowRate.objects.all().filter(user=request.user, title=data.name, description=data.description)
         if len(saved) > 0:
-            saved=saved[0]
+            saved = saved[0]
         else:
             saved = TVShowRate(user=request.user,
-                                title=data.name,
-                                rating=data.rating,
-                                years=data.years,
-                                countries=data.countries,
-                                genres=data.genres,
-                                description=data.description,
-                                isInList=False)    
+                               title=data.name,
+                               rating=data.rating,
+                               years=data.years,
+                               countries=data.countries,
+                               genres=data.genres,
+                               description=data.description,
+                               isInList=False)
             saved.save()
 
         if saved.isInList:
             return redirect("series_info", saved.pk)
 
         context = {'series_result': series_result,
-                                               'series_name': series_name,
-                                               'series_rating': series_rating,
-                                               'series_years': series_years,
-                                               'series_countries': series_countries,
-                                               'series_genres': series_genres,
-                                               'series_description': series_description,
-                                               'id' : saved.id}
+                   'series_name': series_name,
+                   'series_rating': series_rating,
+                   'series_years': series_years,
+                   'series_countries': series_countries,
+                   'series_genres': series_genres,
+                   'series_description': series_description,
+                   'id': saved.id}
         context.update(self.get_context_mixin(request=self.request))
         current_series.update(context)
         return redirect("series_add")
+
 
 def modify(request, id, action):
     saved = TVShowRate.objects.get(pk=id)
@@ -126,14 +130,16 @@ def modify(request, id, action):
 
     return redirect('profile')
 
+
 class ProfileView(LoginRequiredMixin, Mixin, View):
     def get(self, request):
         context = dict()
         context.update(self.get_context_mixin(request=self.request))
-        TVShowRate.objects.all().filter(user = request.user, isInList=False).delete()
-        saved = TVShowRate.objects.all().filter(user = request.user)
-        context.update({'series' : saved})
+        TVShowRate.objects.all().filter(user=request.user, isInList=False).delete()
+        saved = TVShowRate.objects.all().filter(user=request.user)
+        context.update({'series': saved})
         return render(request, 'profile.html', context)
+
 
 class SeriesInfoView(LoginRequiredMixin, Mixin, TemplateView):
     template_name = "series_info.html"
@@ -144,12 +150,12 @@ class SeriesInfoView(LoginRequiredMixin, Mixin, TemplateView):
         saved = TVShowRate.objects.get(pk=id)
         current_series.clear()
         current_series.update({'series_name': saved.title,
-                                               'series_rating': saved.rating,
-                                               'series_years': saved.years,
-                                               'series_countries': saved.countries,
-                                               'series_genres': saved.genres,
-                                               'series_description': saved.description,
-                                               'id': saved.id})
+                               'series_rating': saved.rating,
+                               'series_years': saved.years,
+                               'series_countries': saved.countries,
+                               'series_genres': saved.genres,
+                               'series_description': saved.description,
+                               'id': saved.id})
         context.update(current_series)
         context.update({'series_result': 'Сериал из списка:',
                         'isInList': saved.isInList,
