@@ -90,6 +90,7 @@ class SearchPage(LoginRequiredMixin, Mixin, FormView):
         series_countries = f"Страны съёмки: {data.countries}"
         series_genres = f"Жанры: {data.genres}"
         series_description = data.description
+        series_episodes_amount = data.episodes_amount
         saved = TVShowRate.objects.all().filter(user=request.user, title=data.name, description=data.description)
         if len(saved) > 0:
             saved = saved[0]
@@ -101,6 +102,7 @@ class SearchPage(LoginRequiredMixin, Mixin, FormView):
                                countries=data.countries,
                                genres=data.genres,
                                description=data.description,
+                               episodes_amount=series_episodes_amount,
                                isInList=False)
             saved.save()
 
@@ -114,6 +116,7 @@ class SearchPage(LoginRequiredMixin, Mixin, FormView):
                    'series_countries': series_countries,
                    'series_genres': series_genres,
                    'series_description': series_description,
+                   'series_episodes_amount': series_episodes_amount,
                    'id': saved.id}
         context.update(self.get_context_mixin(request=self.request))
         current_series.update(context)
@@ -155,7 +158,9 @@ class SeriesInfoView(LoginRequiredMixin, Mixin, TemplateView):
                                'series_countries': saved.countries,
                                'series_genres': saved.genres,
                                'series_description': saved.description,
-                               'id': saved.id})
+                               'id': saved.id,
+                               'series_episodes_amount': saved.episodes_amount,
+                               'series_viewed_episodes_amount': saved.viewed_episodes_amount})
         context.update(current_series)
         context.update({'series_result': 'Сериал из списка:',
                         'isInList': saved.isInList,
@@ -171,19 +176,30 @@ class SeriesAddView(LoginRequiredMixin, Mixin, TemplateView):
         context = super(SeriesAddView, self).get_context_data(**kwargs)
         context.update(self.get_context_mixin(request=self.request, **kwargs))
         context.update(current_series)
-        context['form'] = ScoreForm
+        context['form'] = UsersInfo(episodes_amount=current_series['series_episodes_amount'])
         context['change'] = False
         if action == "change":
             context['change'] = True
         return context
 
     def post(self, request, *args, **kwargs):
-        print(request.POST)
         saved = TVShowRate.objects.all().filter(user=request.user,
                                                 title=current_series['series_name'],
                                                 description=current_series['series_description'])
         saved = saved[0]
-        if request.POST['series_score']:
-            saved.score = int(request.POST['series_score'])
-        saved.save()
-        return redirect("modify", id=saved.pk, action="add")
+
+        form = UsersInfo(data=request.POST, episodes_amount=saved.episodes_amount)
+
+        if form.is_valid():
+            if request.POST['series_score']:
+                saved.score = int(request.POST['series_score'])
+
+            if request.POST['viewed_episodes_amount']:
+                saved.viewed_episodes_amount = int(request.POST['viewed_episodes_amount'])
+
+            saved.save()
+            return redirect("modify", id=saved.pk, action="add")
+        else:
+            context = self.get_context_data()
+            context.update({'form' : form})
+            return render(request, template_name=self.template_name, context=context)

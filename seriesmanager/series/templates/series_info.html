@@ -12,14 +12,30 @@
 <p> {{series_genres}}</p>
 <p> {{series_description}}</p>
 
-<h4>Ваша оценка :</h4>
 
-{% if series_score %}
-    <p>{{series_score}} / 10</p>
-{% else %}
-    <p>Вы не поставили оценку</p>
-{% endif %}
 
+<div>
+    <div class="row">
+        <div class="col">
+            <h4>Ваша оценка :</h4>
+            {% if series_score %}
+                <p>{{series_score}} / 10</p>
+             {% else %}
+                <p>Вы не поставили оценку</p>
+            {% endif %}
+        </div>
+        <div class="col">
+            <h4>Число просмотренных серий :</h4>
+            {% if series_viewed_episodes_amount %}
+                <p>{{series_viewed_episodes_amount}} / {{series_episodes_amount}}</p>
+            {% else %}
+                <p>Вы не отметили число просмотренных серий</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<br>
 
 <div>
     <div class="row">

@@ -12,6 +12,13 @@
 <p> {{series_genres}}</p>
 <p> {{series_description}}</p>
 
+{% if series_episodes_amount %}
+<p>Количество серий : {{series_episodes_amount}}</p>
+{% endif %}
+
+
+<br>
+
 <form method="post">
         {% csrf_token %}
 

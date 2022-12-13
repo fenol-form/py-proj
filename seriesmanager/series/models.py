@@ -13,6 +13,8 @@ class TVShowRate(models.Model):
     genres = models.CharField(max_length=50)
     description = models.CharField(max_length=2500)
     isInList = models.BooleanField(null=True, blank=True)
+    episodes_amount = models.IntegerField(null=True, blank=True)
+    viewed_episodes_amount = models.IntegerField(null=True, blank=True)
     score = models.IntegerField(null=True, blank=True, validators=(
         MinValueValidator(1),
         MaxValueValidator(10)
