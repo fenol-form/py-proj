@@ -33,6 +33,7 @@ class SeriesSpiderItem:
     genres = []
     description = str()
     id = str()
+    episodes_amount = int()
 
 
 API = '95134f460dac16877f0a55bcda17fc62'
@@ -54,11 +55,15 @@ def get_info(category, dom, series, series_id):
     genres = dom.xpath('//a[contains(@href, "/lists/movies/genre")]/text()')
     countries = dom.xpath('//a[contains(@href, "/lists/movies/country")]/text()')
     rating = dom.xpath('//span[contains(@class, "styles_rating")]/text()')[0]
+    script = dom.xpath('//script[@type="application/ld+json"]/text()')[0]
+    pattern = r'"numberOfEpisodes":[0-9]+'
+    episodes_amount = re.findall(pattern, script)[0][19:]
     if str(category).lower().replace('«', '').replace('»', '').replace('"', '') == \
             name.lower().replace('«', '').replace('»', '').replace('"', ''):
         series.result = 'Найден сериал:'
     else:
         series.result = 'Возможно, Вы имели в виду:'
+    series.episodes_amount = episodes_amount
     series.name = name
     series.description = description
     series.years = years
