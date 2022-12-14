@@ -91,19 +91,28 @@ class SearchPage(LoginRequiredMixin, Mixin, FormView):
         series_genres = f"Жанры: {data.genres}"
         series_description = data.description
         series_episodes_amount = data.episodes_amount
-        saved = TVShowRate.objects.all().filter(user=request.user, title=data.name, description=data.description)
+        saved = Review.objects.all().filter(user=request.user, title=data.name, kpId=data.id)
         if len(saved) > 0:
             saved = saved[0]
         else:
-            saved = TVShowRate(user=request.user,
-                               title=data.name,
-                               rating=data.rating,
-                               years=data.years,
-                               countries=data.countries,
-                               genres=data.genres,
-                               description=data.description,
-                               episodes_amount=series_episodes_amount,
-                               isInList=False)
+            savedSeries = Series.objects.all().filter(title=data.name, kpId=data.id)
+            if len(savedSeries) > 0:
+                savedSeries = savedSeries[0]
+            else:
+                savedSeries = Series(title=data.name,
+                                     rating=data.rating,
+                                     years=data.years,
+                                     countries=data.countries,
+                                     genres=data.genres,
+                                     description=data.description,
+                                     episodes_amount=data.episodes_amount,
+                                     kpId=data.id)
+                savedSeries.save()
+            saved = Review(user=request.user,
+                            series=savedSeries,
+                            title=data.name,
+                            kpId=data.id,
+                            isInList=False)
             saved.save()
 
         if saved.isInList:
@@ -117,14 +126,16 @@ class SearchPage(LoginRequiredMixin, Mixin, FormView):
                    'series_genres': series_genres,
                    'series_description': series_description,
                    'series_episodes_amount': series_episodes_amount,
-                   'id': saved.id}
+                   'kpId': data.id,
+                   'reviewId': saved.pk}
         context.update(self.get_context_mixin(request=self.request))
+        current_series.clear()
         current_series.update(context)
         return redirect("series_add")
 
 
 def modify(request, id, action):
-    saved = TVShowRate.objects.get(pk=id)
+    saved = Review.objects.get(pk=id)
     if action == "add":
         saved.isInList = True
         saved.save()
@@ -138,8 +149,8 @@ class ProfileView(LoginRequiredMixin, Mixin, View):
     def get(self, request):
         context = dict()
         context.update(self.get_context_mixin(request=self.request))
-        TVShowRate.objects.all().filter(user=request.user, isInList=False).delete()
-        saved = TVShowRate.objects.all().filter(user=request.user)
+        Review.objects.all().filter(user=request.user, isInList=False).delete()
+        saved = Review.objects.all().filter(user=request.user)
         context.update({'series': saved})
         return render(request, 'profile.html', context)
 
@@ -150,16 +161,22 @@ class SeriesInfoView(LoginRequiredMixin, Mixin, TemplateView):
     def get_context_data(self, id, request=None, **kwargs):
         context = super(SeriesInfoView, self).get_context_data(**kwargs)
         context.update(self.get_context_mixin(request=self.request, **kwargs))
-        saved = TVShowRate.objects.get(pk=id)
+        saved = Review.objects.get(pk=id)
+        savedSeries = Series.objects.get(pk=saved.series.pk)
         current_series.clear()
-        current_series.update({'series_name': saved.title,
-                               'series_rating': saved.rating,
-                               'series_years': saved.years,
-                               'series_countries': saved.countries,
-                               'series_genres': saved.genres,
-                               'series_description': saved.description,
-                               'id': saved.id,
-                               'series_episodes_amount': saved.episodes_amount,
+        series_rating = f"Рейтинг: {savedSeries.rating}"
+        series_years = f"Годы съёмки: {savedSeries.years}"
+        series_countries = f"Страны съёмки: {savedSeries.countries}"
+        series_genres = f"Жанры: {savedSeries.genres}"
+        current_series.update({'series_name': savedSeries.title,
+                               'series_rating': series_rating,
+                               'series_years': series_years,
+                               'series_countries': series_countries,
+                               'series_genres': series_genres,
+                               'series_description': savedSeries.description,
+                               'reviewId': saved.pk,
+                               'kpId': saved.kpId,
+                               'series_episodes_amount': savedSeries.episodes_amount,
                                'series_viewed_episodes_amount': saved.viewed_episodes_amount})
         context.update(current_series)
         context.update({'series_result': 'Сериал из списка:',
@@ -183,12 +200,13 @@ class SeriesAddView(LoginRequiredMixin, Mixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        saved = TVShowRate.objects.all().filter(user=request.user,
-                                                title=current_series['series_name'],
-                                                description=current_series['series_description'])
+        print(current_series)
+        saved = Review.objects.all().filter(user=request.user,
+                                            title=current_series['series_name'],
+                                            kpId=current_series['kpId'])
         saved = saved[0]
 
-        form = UsersInfo(data=request.POST, episodes_amount=saved.episodes_amount)
+        form = UsersInfo(data=request.POST, episodes_amount=saved.series.episodes_amount)
 
         if form.is_valid():
             if request.POST['series_score']:

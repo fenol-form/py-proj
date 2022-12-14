@@ -5,7 +5,7 @@
 <h2>Ваш список:</h2>
 <ul>
     {%for s in series%}
-        <li><a href="{% url 'series_info' id=s.id %}">{{s.title}}</a></li>
+        <li><a href="{% url 'series_info' id=s.id %}">{{s.title}}</a> (ваша оценка: {{s.score}}, число просмотренных серий: {{s.viewed_episodes_amount}})</li>
     {%endfor%}
 </ul>
 
