@@ -60,15 +60,6 @@ def sign_out(request):
     return redirect("home")
 
 
-class ResultPage(LoginRequiredMixin, Mixin, FormView):
-    template_name = "result.html"
-
-    def get_context_data(self, **kwargs):
-        context = super(ResultPage, self).get_context_data(**kwargs)
-        context.update(self.get_context_mixin(request=self.request, **kwargs))
-        return context
-
-
 class SearchPage(LoginRequiredMixin, Mixin, FormView):
     form_class = SearchForm
     template_name = "search.html"
@@ -200,7 +191,6 @@ class SeriesAddView(LoginRequiredMixin, Mixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        print(current_series)
         saved = Review.objects.all().filter(user=request.user,
                                             title=current_series['series_name'],
                                             kpId=current_series['kpId'])

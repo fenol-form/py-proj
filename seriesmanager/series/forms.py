@@ -14,7 +14,7 @@ class NewUserForm(UserCreationForm):
 
 
 class SearchForm(forms.Form):
-    series_name = forms.CharField()
+    series_name = forms.CharField(label="Название сериала")
 
 class UsersInfo(forms.Form):
     def __init__(self, *args, **kwargs):
@@ -37,6 +37,6 @@ class UsersInfo(forms.Form):
         if data == None:
             return data
         if data > self.episodes_amount:
-            raise ValidationError(f"You must write number not greater than {self.episodes_amount}")
+            raise ValidationError(f"Введите число, не превосходящее {self.episodes_amount}")
         return data
 

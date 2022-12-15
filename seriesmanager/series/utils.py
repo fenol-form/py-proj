@@ -4,12 +4,12 @@ import requests
 import lxml.html as html
 import re
 
-enter_menu = [{"title": "Sign in", "url": "login"},
-              {"title": "Sign up", "url": "registration"},
-              {"title": "Home", "url": "home"}]
+enter_menu = [{"title": "Авторизация", "url": "login"},
+              {"title": "Регистрация", "url": "registration"},
+              {"title": "Главная", "url": "home"}]
 
-exit_menu = [{"title": "Logout", "url": "logout"},
-             {"title": "Home", "url": "home"}]
+exit_menu = [{"title": "Выйти", "url": "logout"},
+             {"title": "Главная", "url": "home"}]
 
 current_series = dict()
 
