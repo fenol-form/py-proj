@@ -75,13 +75,6 @@ class SearchPage(LoginRequiredMixin, Mixin, FormView):
         if series_result == "Сериал не найден":
             context = self.get_context_mixin(request=self.request)
             return render(request, "series_not_found.html", context)
-        series_name = data.name
-        series_rating = f"Рейтинг: {data.rating}"
-        series_years = f"Годы съёмки: {data.years}"
-        series_countries = f"Страны съёмки: {data.countries}"
-        series_genres = f"Жанры: {data.genres}"
-        series_description = data.description
-        series_episodes_amount = data.episodes_amount
         saved = Review.objects.all().filter(user=request.user, title=data.name, kpId=data.id)
         if len(saved) > 0:
             saved = saved[0]
@@ -108,20 +101,17 @@ class SearchPage(LoginRequiredMixin, Mixin, FormView):
 
         if saved.isInList:
             return redirect("series_info", saved.pk)
-
-        context = {'series_result': series_result,
-                   'series_name': series_name,
-                   'series_rating': series_rating,
-                   'series_years': series_years,
-                   'series_countries': series_countries,
-                   'series_genres': series_genres,
-                   'series_description': series_description,
-                   'series_episodes_amount': series_episodes_amount,
-                   'kpId': data.id,
-                   'reviewId': saved.pk}
-        context.update(self.get_context_mixin(request=self.request))
         current_series.clear()
-        current_series.update(context)
+        current_series.update({'series_result': series_result,
+                            'series_name': data.name,
+                            'series_rating': f"Рейтинг: {data.rating}",
+                            'series_years': f"Годы съёмки: {data.years}",
+                            'series_countries': f"Страны съёмки: {data.countries}",
+                            'series_genres': f"Жанры: {data.genres}",
+                            'series_description': data.description,
+                            'series_episodes_amount': data.episodes_amount,
+                            'kpId': data.id,
+                            'reviewId': saved.pk})
         return redirect("series_add")
 
 
@@ -155,22 +145,19 @@ class SeriesInfoView(LoginRequiredMixin, Mixin, TemplateView):
         saved = Review.objects.get(pk=id)
         savedSeries = Series.objects.get(pk=saved.series.pk)
         current_series.clear()
-        series_rating = f"Рейтинг: {savedSeries.rating}"
-        series_years = f"Годы съёмки: {savedSeries.years}"
-        series_countries = f"Страны съёмки: {savedSeries.countries}"
-        series_genres = f"Жанры: {savedSeries.genres}"
         current_series.update({'series_name': savedSeries.title,
-                               'series_rating': series_rating,
-                               'series_years': series_years,
-                               'series_countries': series_countries,
-                               'series_genres': series_genres,
+                               'series_rating': f"Рейтинг: {savedSeries.rating}",
+                               'series_years': f"Годы съёмки: {savedSeries.years}",
+                               'series_countries': f"Страны съёмки: {savedSeries.countries}",
+                               'series_genres': f"Жанры: {savedSeries.genres}",
                                'series_description': savedSeries.description,
                                'reviewId': saved.pk,
                                'kpId': saved.kpId,
-                               'series_episodes_amount': savedSeries.episodes_amount,
-                               'series_viewed_episodes_amount': saved.viewed_episodes_amount})
+                               'series_episodes_amount': savedSeries.episodes_amount
+                               })
         context.update(current_series)
-        context.update({'series_result': 'Сериал из списка:',
+        context.update({'series_viewed_episodes_amount': saved.viewed_episodes_amount,
+                        'series_result': 'Сериал из списка:',
                         'isInList': saved.isInList,
                         'series_score': saved.score})
 
